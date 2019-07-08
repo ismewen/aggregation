@@ -39,4 +39,3 @@ class CustomSQLAlchemy(SQLAlchemy):
 
 
 db = CustomSQLAlchemy(query_class=CustomQuery)
-

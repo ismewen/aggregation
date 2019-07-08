@@ -1,3 +1,11 @@
+from functools import wraps
+from typing import List, Callable
+
+from flask import request
+
+from aggregation import exceptions
+
+
 class MethodMapper(dict):
     """
     Enables mapping HTTP methods to different ViewSet methods for a single,
@@ -90,3 +98,26 @@ def action(methods=None, detail=None, url_path=None, url_name=None, **kwargs):
 
         return func
     return decorator
+
+
+def url_params_require(mandatory_params: List):
+
+    def decorator(func):
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            for args_name in mandatory_params:
+                mandatory = dict()
+                value = request.args.get(args_name, None)
+                if value is None:
+                    raise exceptions.RequestArgsMissing(format_kwargs=dict(args_name=args_name))
+                else:
+                    mandatory[args_name] = value
+                setattr(request, "mandatory_params", mandatory)
+            return func(*args, **kwargs)
+        return wrapper
+
+    return decorator
+
+
+

@@ -1,11 +1,14 @@
 import os
-
 SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI', 'postgres://postgres:@127.0.0.1:5432/aggregation')
+SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI',
+                                    'mysql+pymysql://root:ismewen@localhost/cluster-aggregation')
+
 SECCRET_KEY = "HELLO"
 DEBUG = True
 REQUEST_DEBUG = False
 DEBUG_RANDOM_LATENCY = 1
 
+APP_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # refers to application_topS
 
 import logging.config
 
@@ -31,7 +34,7 @@ LOGGING = {
         },
         # 其他的 handler
     },
-    'loggers':{
+    'loggers': {
         'StreamLogger': {
             'handlers': ['console'],
             'level': 'DEBUG',
@@ -45,6 +48,30 @@ LOGGING = {
     }
 }
 
-
 CELERY_BROKER_URL = "redis://localhost:6379"
 CELERY_RESULT_BACKEND = "redis://localhost:6379"
+
+AGENT_SERVER_USER = "tripanels"
+AGENT_SERVER_PASSWORD = "jJ$kifvz17g735p7"
+
+TESTING = True
+
+ENVIRONMENT = os.getenv("AGGREGATION", "LOCAL")
+
+if ENVIRONMENT == "TESTING":
+    try:
+        from .test_settings import *
+    except ImportError as e:
+        pass
+
+elif ENVIRONMENT == "LOCAL":
+    try:
+        from .local_settings import *
+    except ImportError as e:
+        pass
+
+elif ENVIRONMENT == "PRODUCTION":
+    try:
+        from .production_settings import *
+    except ImportError as e:
+        pass

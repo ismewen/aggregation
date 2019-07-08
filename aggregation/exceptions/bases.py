@@ -50,7 +50,7 @@ class HMTBaseException(Exception):
             self.message = message
 
         self._message = self.message
-        self.message = self.message.format(format_kwargs)
+        self.message = self.message.format(**format_kwargs)
 
         self.format_params = format_kwargs
 

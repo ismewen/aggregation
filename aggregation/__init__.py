@@ -1,7 +1,7 @@
 import logging
 import logging.config
 from flask import Flask
-from aggregation.core.discovery import discover, auto_register_blueprint
+from aggregation.core.discovery import discover, auto_register_blueprint, discover_remote_apps_api
 from aggregation.extensions.babel import babel
 from aggregation.extensions.ma import ma
 from aggregation.extensions.db import db
@@ -29,9 +29,10 @@ def create_app(settings):
     # marshmallow init
     ma.init_app(app)
 
-    # 蓝图注册
+    # discovery
     auto_register_blueprint(app)
 
+    discover_remote_apps_api()
     # login init
     login_manager.init_app(app)
 

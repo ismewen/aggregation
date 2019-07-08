@@ -1,3 +1,4 @@
+import os
 import time
 import json
 from functools import wraps
@@ -19,6 +20,7 @@ class CustomClient(FlaskClient):
     def open(self, *args, **kwargs):
         start = time.time()
         js = kwargs.pop('json', None)
+        params = kwargs.pop("params", None)
         if js is not None:
             data = json.dumps(js)
             headers = kwargs.pop('headers', {})
@@ -33,6 +35,15 @@ class CustomClient(FlaskClient):
             headers.update(self.get_user_authorization(user))
             kwargs['headers'] = headers
         target = args[0]
+        if params is not None:
+            assert isinstance(params, dict)
+            url_params = ""
+            for args_name, value in params.items():
+                url_params += "{args_name}={value}&".format(args_name=args_name, value=value)
+            url_params = url_params.strip("&")
+            target += "?{url_params}".format(url_params=url_params)
+            new_args = [target] + list(args)[1:]
+            args = tuple(new_args)
         resp = super(CustomClient, self).open(*args, **kwargs)
         resp.target = target
         resp.elapsed = time.time() - start
@@ -83,8 +94,7 @@ class AggregationAuthorizedTestCase(AggregationTestCase):
                     kwargs['user'] = self.oauth_client.user
                 ret = f(*args, **kwargs)
                 return ret
+
             return wrapper
 
         self.client.open = decorator(self.client.open)
-
-
