@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 78b3d24ec5dc
+Revision ID: 6fa3e19f888d
 Revises: 
-Create Date: 2019-07-05 10:13:59.133522
+Create Date: 2019-07-10 09:04:05.444042
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '78b3d24ec5dc'
+revision = '6fa3e19f888d'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -35,26 +35,27 @@ def upgrade():
     sa.Column('created', sa.DateTime(), nullable=False),
     sa.Column('updated', sa.DateTime(), nullable=False),
     sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=32), nullable=True),
     sa.Column('status', sa.Integer(), nullable=True),
+    sa.Column('infix', sa.String(length=255), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('cluster_inspect_info',
     sa.Column('created', sa.DateTime(), nullable=False),
     sa.Column('updated', sa.DateTime(), nullable=False),
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('pods_num', sa.Integer(), nullable=True),
+    sa.Column('pod_num', sa.Integer(), nullable=True),
     sa.Column('node_num', sa.Integer(), nullable=True),
+    sa.Column('cpu_lim_avg', sa.Numeric(precision=12, scale=6), nullable=True),
+    sa.Column('cpu_req_avg', sa.Numeric(precision=12, scale=6), nullable=True),
+    sa.Column('cpu_usage_avg', sa.Numeric(precision=12, scale=6), nullable=True),
+    sa.Column('mem_lim_avg', sa.Numeric(precision=12, scale=6), nullable=True),
+    sa.Column('mem_usage_avg', sa.Numeric(precision=12, scale=6), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('parent',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=255), nullable=True),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_table('strategy_express',
-    sa.Column('created', sa.DateTime(), nullable=False),
-    sa.Column('updated', sa.DateTime(), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('user',
@@ -168,7 +169,6 @@ def downgrade():
     op.drop_table('client')
     op.drop_table('child')
     op.drop_table('user')
-    op.drop_table('strategy_express')
     op.drop_table('parent')
     op.drop_table('cluster_inspect_info')
     op.drop_table('cluster_deploy_strategy')

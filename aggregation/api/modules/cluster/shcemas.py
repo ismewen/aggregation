@@ -23,4 +23,5 @@ class ClusterInspectInfoSyncSchema(ma.ModelSchema):
 
     @pre_load
     def pre_load(self, data, many=False):
+        data['node_num'] = data['nod_num']
         return {key: float(str(value).strip("%")) for key, value in data.items()}
