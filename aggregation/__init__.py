@@ -6,6 +6,7 @@ from flask_mail import Message
 from sentry_sdk.integrations.flask import FlaskIntegration
 
 from aggregation.core.discovery import discover, auto_register_blueprint, discover_remote_apps_api
+from aggregation.extensions.apm import apm
 from aggregation.extensions.babel import babel
 from aggregation.extensions.ma import ma
 from aggregation.extensions.db import db
@@ -47,6 +48,11 @@ def create_app(settings):
     sentry_sdk.init(settings.SENTRY_DSN, integrations=[FlaskIntegration()])
     # mail init
     # mail.send()
+
+    # apm init
+    if settings.PRODUCTION:
+        apm.init_app(app)
+
     return app
 
 

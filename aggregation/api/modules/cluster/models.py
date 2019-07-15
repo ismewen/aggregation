@@ -41,6 +41,8 @@ class Cluster(db.Model, Timestamp):
     def is_active(self):
         return self.status == 100
 
+    def make_full(self):
+        self.status = 200
 
 class ClusterInspectInfo(db.Model, Timestamp):
     __tablename__ = "cluster_inspect_info"
@@ -83,6 +85,9 @@ class ClusterDeployStrategy(db.Model, Timestamp):
     def is_default(self):
         return self.name == "default"
 
+    def get_format_str(self):
+        return ";\n".join([express.get_format_str() for express in self.expressions])
+
 
 class StrategyProductConfig(db.Model, Timestamp):
     id = db.Column(db.Integer, primary_key=True)
@@ -107,8 +112,7 @@ class StrategyExpression(db.Model, Timestamp):
     relation_operator = db.Column(db.String(64), doc=u"operator")
     operator_value = db.Column(db.Numeric(12, 6))
 
-    @property
-    def readable_expression(self):
+    def get_format_str(self):
         return "{} {} {}".format(self.infix, self.relation_operator, self.operator_value)
 
 

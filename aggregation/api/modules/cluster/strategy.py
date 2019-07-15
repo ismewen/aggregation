@@ -1,8 +1,10 @@
 import decimal
-from typing import List
 
-from aggregation.api.modules.cluster.models import ClusterDeployStrategy, Cluster, StrategyProductConfig, \
+from aggregation import db
+from aggregation.api.modules.cluster.models import ClusterDeployStrategy, StrategyProductConfig, \
     ClusterInspectInfo, StrategyExpression
+
+from aggregation.api.modules.utils.tasks import send_email
 
 
 class ExpressionOperationMapping(object):
@@ -142,7 +144,23 @@ class StrategyUtil(object):
     def apply_strategy(self):
         strategy = self.get_strategy()
         if not self.is_strategy_success(strategy):
+            # need check
+            strategy_str = strategy.get_format_str()
+            cluster_info = self.dump_cluster_inspect_info()
+            content = strategy_str + "\n" + cluster_info
+            send_email(["ismewen@163.com"], sub="需要检查集群信息", content=content)
+            self.cluster.make_full()
+            db.session.add(self.cluster)
+            db.session.commit()
+        else:
+            # normal
             pass
+
+    def dump_cluster_inspect_info(self):
+        from .shcemas import ClusterInspectInfoDumpSchema
+        s = ClusterInspectInfoDumpSchema()
+        data, error = s.dumps(self.cluster_inspect_info)
+        return data
 
 
 class ExpressFix(object):

@@ -7,6 +7,7 @@ from typing import List
 import arrow
 from aggregation.api.modules.cluster.models import Cluster, ClusterInspectInfo
 from aggregation.api.modules.cluster.shcemas import ClusterSyncSchema, ClusterInspectInfoSyncSchema
+from aggregation.api.modules.cluster.strategy import StrategyUtil
 from aggregation.remote_apps.agent_server.bases import AgentServerClient
 from celery_app import celery
 
@@ -95,4 +96,5 @@ def cluster_status_strategy():
         ).first()
         if not latest_inspect_info:
             continue
-
+        su = StrategyUtil(latest_inspect_info)
+        su.apply_strategy()

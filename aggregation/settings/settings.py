@@ -67,10 +67,15 @@ SMTP_STARTTLS = False
 SMTP_TLS = False
 TESTING = True
 
+##
+ELASTIC_APM = dict(SERVICE_NAME='aide_api', SECRET_TOKEN=None, SERVER_URL='http://localhost:8200')
+
 ENVIRONMENT = os.getenv("AGGREGATION", "LOCAL")
 
 # sentry
 SENTRY_DSN = "https://290b234cf226411d8768364b318f65c6@sentry.io/1501311"
+
+PRODUCTION = False
 
 if ENVIRONMENT == "TESTING":
     try:

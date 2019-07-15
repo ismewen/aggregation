@@ -1,3 +1,4 @@
+from flask_marshmallow.fields import fields
 from marshmallow import pre_load
 
 from aggregation.api.modules.cluster import models
@@ -25,3 +26,15 @@ class ClusterInspectInfoSyncSchema(ma.ModelSchema):
     def pre_load(self, data, many=False):
         data['node_num'] = data['nod_num']
         return {key: float(str(value).strip("%")) for key, value in data.items()}
+
+
+class ClusterSchema(ma.ModelSchema):
+    class Meta:
+        model = models.Cluster
+
+
+class ClusterInspectInfoDumpSchema(ma.ModelSchema):
+    cluster = fields.Nested(ClusterSchema, many=False)
+
+    class Meta:
+        model = models.ClusterInspectInfo
