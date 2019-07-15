@@ -1,6 +1,10 @@
 import logging
 import logging.config
 from flask import Flask
+import sentry_sdk
+from flask_mail import Message
+from sentry_sdk.integrations.flask import FlaskIntegration
+
 from aggregation.core.discovery import discover, auto_register_blueprint, discover_remote_apps_api
 from aggregation.extensions.babel import babel
 from aggregation.extensions.ma import ma
@@ -36,9 +40,13 @@ def create_app(settings):
     # login init
     login_manager.init_app(app)
 
-
     # babel init
-
     babel.init_app(app)
 
+    # sentry init
+    sentry_sdk.init(settings.SENTRY_DSN, integrations=[FlaskIntegration()])
+    # mail init
+    # mail.send()
     return app
+
+

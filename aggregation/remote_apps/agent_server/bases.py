@@ -1,10 +1,13 @@
-from typing import Dict
+import logging
 
+from typing import Dict
 from requests import Response
 
 from aggregation import settings, exceptions
 from aggregation.api.modules.cluster.models import Cluster
 from aggregation.remote_apps.bases import ClientBase, RemoteAPIBase
+
+logger = logging.getLogger("FileLogger")
 
 
 class AgentServerClient(ClientBase):

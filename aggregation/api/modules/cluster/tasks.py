@@ -1,9 +1,11 @@
+import datetime
 import os
 import json
 
 from typing import List
 
-from aggregation.api.modules.cluster.models import Cluster
+import arrow
+from aggregation.api.modules.cluster.models import Cluster, ClusterInspectInfo
 from aggregation.api.modules.cluster.shcemas import ClusterSyncSchema, ClusterInspectInfoSyncSchema
 from aggregation.remote_apps.agent_server.bases import AgentServerClient
 from celery_app import celery
@@ -43,9 +45,9 @@ class ClusterInfoSync(object):
 
 class ClusterInspectInfoRecordSync(object):
 
-    def __init__(self, cluster: Cluster, client: AgentServerClient):
+    def __init__(self, cluster: Cluster, client_cls: type(AgentServerClient)):
         self.cluster = cluster
-        self.client = client
+        self.client = client_cls(cluster)
 
     def get_cluster_inspect_info(self):
         res = self.client.api_cluster.get_cluster_info()
@@ -63,7 +65,9 @@ class ClusterInspectInfoRecordSync(object):
 
 @celery.task()
 def cluster_info_record_sync():
-    clusters = Cluster.query.filter(Cluster.is_active).all()
+    clusters = Cluster.query.filter(Cluster.can_ask_inspect_info).filter(
+        Cluster.is_active
+    ).all()
     for cluster in clusters:
         client = AgentServerClient(cluster)
         sync = ClusterInspectInfoRecordSync(cluster=cluster, client=client)
@@ -73,4 +77,22 @@ def cluster_info_record_sync():
     except Exception as e:
         print(e)
         db.session.rollback()
+    finally:
+        cluster_status_strategy.delay()
+
+
+@celery.task()
+def cluster_status_strategy():
+    clusters = Cluster.query.filter(Cluster.can_ask_inspect_info).all()
+    for cluster in clusters:
+        latest_inspect_info = ClusterInspectInfo.query.filter(
+            ClusterInspectInfo.cluster == cluster
+        ).filter(
+            # seven seven seven
+            ClusterInspectInfo.created > arrow.now() - datetime.timedelta(minutes=7)
+        ).order_by(
+            ClusterInspectInfo.id.desc()
+        ).first()
+        if not latest_inspect_info:
+            continue
 

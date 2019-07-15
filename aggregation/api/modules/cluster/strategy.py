@@ -1,7 +1,8 @@
 import decimal
 from typing import List
 
-from aggregation.api.modules.cluster.models import ClusterDeployStrategy, Cluster
+from aggregation.api.modules.cluster.models import ClusterDeployStrategy, Cluster, StrategyProductConfig, \
+    ClusterInspectInfo, StrategyExpression
 
 
 class ExpressionOperationMapping(object):
@@ -86,21 +87,62 @@ class Stack(object):
         return len(self.items)
 
 
-class DeployClusterStrategy(object):
+class DeployClusterChoices(object):
 
-    def __init__(self, package_name: str, region: str):
-        self.package_name = package_name
+    def __init__(self, product_name: str, region: str):
+        self.package_name = product_name
         self.region = region
-        self.strategy = self.get_strategy(package_name)
+        self.strategy = self.get_strategy(product_name)
 
-    def get_strategy(self, package_name) -> ClusterDeployStrategy:
+    @classmethod
+    def get_strategy(cls, product_name) -> ClusterDeployStrategy:
+        strategy = StrategyProductConfig.get_strategy(product_name)
+        return strategy
+
+    # def get_current_region_clusters(self) -> List[Cluster]:
+    #     query = Cluster.query.filter(Cluster.is_active)
+    #     if self.region:
+    #         query = query.filter(Cluster.region == self.region)
+    #     return query.all()
+
+    def update_cluster_status(self):
         pass
 
-    def get_current_region_clusters(self) -> List[Cluster]:
-        pass
 
-    def who_is_best_cluster(self) -> Cluster:
-        pass
+class StrategyUtil(object):
+
+    def __init__(self, cluster_inspect_info: ClusterInspectInfo):
+        self.cluster_inspect_info = cluster_inspect_info
+        self.cluster = cluster_inspect_info.cluster  # type Cluster
+
+    @classmethod
+    def get_strategy(cls):
+        return ClusterDeployStrategy.query.filter(ClusterDeployStrategy.is_default).first()
+
+    @classmethod
+    def is_express_success(cls, express: StrategyExpression, cluster_inspect_info: ClusterInspectInfo):
+        infix = express.infix
+        try:
+            op1 = ExpressFix(express_str=infix, express_type="infix",
+                             query_dict=cluster_inspect_info.query_dict).get_post_fix_value()
+        except TypeError as e:
+            return False
+        except ZeroDivisionError as e:
+            return False
+        except decimal.InvalidOperation as e:
+            return False
+        return ExpressionOperationMapping(op1=op1, op=express.relation_operator, op2=express.operator_value).get_value()
+
+    def is_strategy_success(self, strategy: ClusterDeployStrategy) -> bool:
+        for expression in strategy.expressions:
+            if not self.is_express_success(expression, self.cluster_inspect_info):
+                return False
+        return True
+
+    def apply_strategy(self):
+        strategy = self.get_strategy()
+        if not self.is_strategy_success(strategy):
+            pass
 
 
 class ExpressFix(object):

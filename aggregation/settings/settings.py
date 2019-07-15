@@ -1,4 +1,5 @@
 import os
+
 SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI', 'postgres://postgres:@127.0.0.1:5432/aggregation')
 SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI',
                                     'mysql+pymysql://root:ismewen@localhost/cluster-aggregation')
@@ -54,9 +55,22 @@ CELERY_RESULT_BACKEND = "redis://localhost:6379"
 AGENT_SERVER_USER = "tripanels"
 AGENT_SERVER_PASSWORD = "jJ$kifvz17g735p7"
 
+# email
+
+# email Settings
+SMTP_ENABLED = True
+SMTP_HOST = 'smtp.163.com'
+SMTP_PORT = 25
+SMTP_USER = 'ismewen@163.com'
+SMTP_PASS = 'ismewen95'
+SMTP_STARTTLS = False
+SMTP_TLS = False
 TESTING = True
 
 ENVIRONMENT = os.getenv("AGGREGATION", "LOCAL")
+
+# sentry
+SENTRY_DSN = "https://290b234cf226411d8768364b318f65c6@sentry.io/1501311"
 
 if ENVIRONMENT == "TESTING":
     try:

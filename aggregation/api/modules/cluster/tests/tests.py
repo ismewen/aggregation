@@ -2,7 +2,8 @@ import copy
 
 from flask import url_for
 
-from aggregation.api.modules.cluster.models import Cluster, ClusterInspectInfo
+from aggregation.api.modules.cluster.models import Cluster, ClusterInspectInfo, create_default_deploy_strategy, ClusterDeployStrategy
+from aggregation.api.modules.cluster.strategy import StrategyUtil
 from aggregation.core.unnittest.testcase import AggregationAuthorizedTestCase
 from aggregation.remote_apps.agent_server.bases import AgentServerClient
 
@@ -13,7 +14,7 @@ from aggregation.api.modules.cluster.tasks import ClusterInfoSync, ClusterInspec
 class ClusterTestCase(AggregationAuthorizedTestCase):
 
     def test_mandatory_query_params(self):
-        uri = url_for("clusters.ClusterAPIView-most-suitable-deploy-cluster")
+        uri = url_for("clusters.ClusterAPIView-get-available-deploy-cluster")
         res = self.client.get(uri)
         self.assert400(response=res)
         data = {
@@ -41,7 +42,9 @@ class ClusterTestCase(AggregationAuthorizedTestCase):
 
     def test_get_cluster_inspect_info(self):
         self.test_cluster_info_sync()
-        cluster = Cluster.query.filter(Cluster.is_active).first()
+        cluster = Cluster.query.filter(Cluster.can_ask_inspect_info).filter(
+            Cluster.is_active
+        ).first()
         client = AgentServerClient(cluster)
         sync = ClusterInspectInfoRecordSync(cluster=cluster, client=client)
         info = sync.get_cluster_inspect_info()
@@ -50,14 +53,32 @@ class ClusterTestCase(AggregationAuthorizedTestCase):
 
     def test_save_cluster_inspect_info(self):
         self.test_cluster_info_sync()
-        cluster = Cluster.query.filter(Cluster.is_active).first()
+        cluster = Cluster.query.filter(Cluster.can_ask_inspect_info).filter(Cluster.is_active).first()
         client = AgentServerClient(cluster)
         sync = ClusterInspectInfoRecordSync(cluster=cluster, client=client)
         obj = sync.save_record()
         self.assertTrue(isinstance(obj, ClusterInspectInfo))
 
-    def test_sync_cluster_info_task(self):
+    def test_sync_cluster_info_record_task(self):
         self.test_cluster_info_sync()
         cluster_info_record_sync()
         count = ClusterInspectInfo.query.count()
         self.assertTrue(count > 0)
+
+
+class ClusterStrategyTestCase(AggregationAuthorizedTestCase):
+
+    def test_get_strategy(self):
+        m = ClusterTestCase()
+        m.test_sync_cluster_info_record_task()
+        create_default_deploy_strategy()
+        lasted_inspect_info = ClusterInspectInfo.query.first()
+        su = StrategyUtil(lasted_inspect_info)
+        strategy = su.get_strategy()
+        self.assertTrue(isinstance(strategy, ClusterDeployStrategy))
+        # todo is expression 测试
+        su.is_expression_success()
+        su.is_strategy_success()
+
+
+

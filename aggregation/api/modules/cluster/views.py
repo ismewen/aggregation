@@ -21,9 +21,10 @@ class ClusterAPIView(APIView):
 
     @action(detail=False)
     @url_params_require(mandatory_params=['region', 'product_name'])
-    def most_suitable_deploy_cluster(self):
+    def get_available_deploy_cluster(self):
         region = mandatory_params.get('region')
         product_name = mandatory_params.get('product_name')
+
         return "product name, region"
 
 
