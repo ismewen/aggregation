@@ -6,6 +6,12 @@ from aggregation import ma
 from aggregation.common.functions import get_choices_value
 
 
+class ClusterDetailSchema(ma.ModelSchema):
+    class Meta:
+        model = models.Cluster
+        exclude = "cockroachdb_ca",
+
+
 class ClusterSyncSchema(ma.ModelSchema):
     class Meta:
         model = models.Cluster
