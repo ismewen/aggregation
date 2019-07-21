@@ -10,6 +10,8 @@ services:
       - nginx_network
     ports:
       - '8000:8000'
+    environment:
+      - OAUTHLIB_INSECURE_TRANSPORT=True
     depends_on:
       - cluster-db
       - cluster-mq
