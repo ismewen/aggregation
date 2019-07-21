@@ -2,7 +2,7 @@ import os
 
 SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI', 'postgres://postgres:@127.0.0.1:5432/aggregation')
 SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI',
-                                    'mysql+pymysql://root:ismewen@localhost/cluster-aggregation')
+                                    'mysql+pymysql://root:ismewen@cluster-db/cluster-aggregation')
 
 SECCRET_KEY = "HELLO"
 DEBUG = True
