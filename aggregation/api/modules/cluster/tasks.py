@@ -90,7 +90,7 @@ def cluster_status_strategy():
             ClusterInspectInfo.cluster == cluster
         ).filter(
             # seven seven seven
-            ClusterInspectInfo.created > arrow.now() - datetime.timedelta(minutes=7)
+            ClusterInspectInfo.created > (arrow.now() - datetime.timedelta(minutes=7)).datetime
         ).order_by(
             ClusterInspectInfo.id.desc()
         ).first()
