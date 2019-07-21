@@ -16,7 +16,6 @@ from aggregation.extensions.login import login_manager
 
 
 def create_app(settings):
-
     app = Flask(__name__)
     app.config.from_object(settings)
 
@@ -53,6 +52,8 @@ def create_app(settings):
     if settings.PRODUCTION:
         apm.init_app(app)
 
+    @app.route("/")
+    def hello_world():
+        return "hello world"
+
     return app
-
-
