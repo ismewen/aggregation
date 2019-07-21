@@ -41,7 +41,7 @@ def send_email(self, to_list, sub, content):
 
     msg = MIMEText(content, _subtype='plain', _charset='gb2312')
     msg['Subject'] = sub
-    msg['From'] = 'Clouster <%s>' % email_user
+    msg['From'] = 'Cluster <%s>' % email_user
     msg['To'] = ";".join(to_list)
     try:
         # smtp_server.connect(smtp_server)

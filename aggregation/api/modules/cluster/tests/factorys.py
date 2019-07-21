@@ -22,4 +22,3 @@ class ClusterInspectFactory(SQLAlchemyModelFactory):
 
     pods_num = factory.Sequence(lambda n: random.randint(0, n*10))
     nods_num = factory.Sequence(lambda n: random.randint(0, n*10))
-

@@ -11,6 +11,6 @@ class UserFactory(SQLAlchemyModelFactory):
         model = User
         sqlalchemy_session = db.session
 
-    username = factory.Faker('name')
+    user_name = factory.Faker('name')
     password = bcrypt.generate_password_hash("admin")
 

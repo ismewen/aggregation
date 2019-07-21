@@ -33,7 +33,7 @@ class APIView(MethodView):
     per_page: int = 20
     paginator_enabled: bool = True
 
-    decorators = [require_oauth.acquire('Basic')]
+    decorators = [require_oauth.acquire('basic')]
 
     @classmethod
     def _cast(cls, to_type, value, field):

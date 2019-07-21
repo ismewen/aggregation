@@ -2,8 +2,11 @@ import copy
 
 from flask import url_for
 
-from aggregation.api.modules.cluster.models import Cluster, ClusterInspectInfo, create_default_deploy_strategy, ClusterDeployStrategy
+from aggregation import db
+from aggregation.api.modules.cluster.models import Cluster, ClusterInspectInfo, create_default_deploy_strategy, \
+    ClusterDeployStrategy
 from aggregation.api.modules.cluster.strategy import StrategyUtil
+from aggregation.api.modules.cluster.tests.factorys import ClusterFactory
 from aggregation.core.unnittest.testcase import AggregationAuthorizedTestCase
 from aggregation.remote_apps.agent_server.bases import AgentServerClient
 
@@ -68,17 +71,94 @@ class ClusterTestCase(AggregationAuthorizedTestCase):
 
 class ClusterStrategyTestCase(AggregationAuthorizedTestCase):
 
-    def test_get_strategy(self):
-        m = ClusterTestCase()
-        m.test_sync_cluster_info_record_task()
-        create_default_deploy_strategy()
-        lasted_inspect_info = ClusterInspectInfo.query.first()
-        su = StrategyUtil(lasted_inspect_info)
+    def test_success_strategy(self):
+        inspect_info = self.create_strategy_success_info()
+        su = StrategyUtil(inspect_info)
         strategy = su.get_strategy()
         self.assertTrue(isinstance(strategy, ClusterDeployStrategy))
-        # todo is expression 测试
-        su.is_expression_success()
-        su.is_strategy_success()
 
+        flag = su.is_strategy_success(strategy=strategy)
 
+        strategy_str = strategy.get_format_str()
+        cluster_info = su.dump_cluster_inspect_info()
 
+        content = strategy_str + "\n" + cluster_info
+
+        print(content)
+        self.assertTrue(flag)
+
+    @classmethod
+    def create_strategy_success_info(cls):
+        from aggregation.api.modules.cluster.shcemas import ClusterInspectInfoSyncSchema
+        cluster = ClusterFactory()
+        data = {
+            'cpu_lim_avg': 245,
+            'cpu_req_avg': 18,
+            'cpu_usage_avg': 8.33333,
+            'mem_lim_avg': 112,
+            'mem_req_avg': 4,
+            'mem_usage_avg': 25.6667,
+            'nod_num': 3,
+            'pod_num': 95,
+        }
+        s = ClusterInspectInfoSyncSchema()
+        inspect_info, error = s.load(data)
+        inspect_info.cluster = cluster
+        create_default_deploy_strategy()
+
+        db.session.add(inspect_info)
+        db.session.commit()
+        return inspect_info
+
+    @classmethod
+    def create_strategy_failed_info(cls):
+        from aggregation.api.modules.cluster.shcemas import ClusterInspectInfoSyncSchema
+        cluster = ClusterFactory()
+        data = {
+            'cpu_lim_avg': 245,
+            'cpu_req_avg': 18,
+            'cpu_usage_avg': 8.33333,
+            'mem_lim_avg': 112,
+            'mem_req_avg': 4,
+            'mem_usage_avg': 85.6667,
+            'nod_num': 3,
+            'pod_num': 95,
+        }
+        s = ClusterInspectInfoSyncSchema()
+        inspect_info, error = s.load(data)
+        inspect_info.cluster = cluster
+        create_default_deploy_strategy()
+
+        db.session.add(inspect_info)
+        db.session.commit()
+        return inspect_info
+
+    def test_failed_strategy(self):
+        inspect_info = self.create_strategy_failed_info()
+        su = StrategyUtil(inspect_info)
+        strategy = su.get_strategy()
+        self.assertTrue(isinstance(strategy, ClusterDeployStrategy))
+
+        flag = su.is_strategy_success(strategy=strategy)
+
+        strategy_str = strategy.get_format_str()
+        cluster_info = su.dump_cluster_inspect_info()
+
+        content = strategy_str + "\n" + cluster_info
+
+        print(content)
+        self.assertFalse(flag)
+
+    def test_apply_success_strategy(self):
+        inspect_info = self.create_strategy_success_info()
+        su = StrategyUtil(inspect_info)
+        su.cluster.make_full()
+        su.apply_strategy()
+        self.assertTrue(su.cluster.is_active)
+
+    def test_apply_failed_strategy(self):
+        inspect_info = self.create_strategy_failed_info()
+        su = StrategyUtil(inspect_info)
+        self.assertFalse(su.cluster.is_full)
+        su.apply_strategy()
+        self.assertTrue(su.cluster.is_full)

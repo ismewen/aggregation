@@ -1,0 +1,85 @@
+version: "3"
+# api, worker, beat, mq, mysql,
+services:
+
+  cluster-api:
+    build: .
+    networks:
+      - mq
+      - db
+      - nginx_network
+    ports:
+      - '8000:8000'
+    depends_on:
+      - cluster-db
+      - cluster-mq
+    volumes:
+      - ./config/settings/settings.py:/code/aggregation/settings/settings.py
+    restart: always
+
+  cluster-celery-worker:
+    build: .
+    networks:
+      - mq
+      - db
+    depends_on:
+      - cluster-db
+      - cluster-mq
+    volumes:
+      - ./config/settings/settings.py:/code/aggregation/settings/settings.py
+    command: 'celery -A celery_app.celery worker -c 4 -Q celery'
+    restart: always
+
+  cluster-celery-beat:
+    build: .
+    networks:
+      - mq
+      - db
+    depends_on:
+      - cluster-db
+      - cluster-mq
+    volumes:
+      - ./config/settings/settings.py:/code/aggregation/settings/settings.py
+    command: 'celery -A celery_app.celery beat --pidfile=/opt/celeryd.pid'
+    restart: always
+
+  cluster-db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ismewen
+    volumes:
+      - ~/mysql:/var/lib/mysql
+    networks:
+      - db
+
+  cluster-mq:
+    image: rabbitmq:3.8-rc-management
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: ismewen
+      RABBITMQ_DEFAULT_PASS: ismewen
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - ~/rabbitmq:/var/lib/rabbitmq
+    networks:
+      - mq
+
+  nginx:
+    image: nginx
+    ports:
+      - 80:80
+    volumes:
+      - ./config/nginx/conf.d:/etc/nginx/conf.d
+      - ./log/nginx/:/var/log/nginx
+    depends_on:
+      - cluster-api
+    networks:
+      - nginx_network
+
+networks:
+  db:
+  mq:
+  nginx_network:

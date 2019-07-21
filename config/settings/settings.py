@@ -49,8 +49,8 @@ LOGGING = {
     }
 }
 
-CELERY_BROKER_URL = "redis://localhost:6379"
-CELERY_RESULT_BACKEND = "redis://localhost:6379"
+CELERY_BROKER_URL = "amqp://ismewen:ismewen@cluster-mq/"
+CELERY_RESULT_BACKEND = "amqp://ismewen:ismewen@cluster-mq/"
 
 AGENT_SERVER_USER = "tripanels"
 AGENT_SERVER_PASSWORD = "jJ$kifvz17g735p7"

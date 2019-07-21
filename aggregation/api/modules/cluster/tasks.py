@@ -5,6 +5,7 @@ import json
 from typing import List
 
 import arrow
+
 from aggregation.api.modules.cluster.models import Cluster, ClusterInspectInfo
 from aggregation.api.modules.cluster.shcemas import ClusterSyncSchema, ClusterInspectInfoSyncSchema
 from aggregation.api.modules.cluster.strategy import StrategyUtil
@@ -98,3 +99,4 @@ def cluster_status_strategy():
             continue
         su = StrategyUtil(latest_inspect_info)
         su.apply_strategy()
+        db.session.commit()

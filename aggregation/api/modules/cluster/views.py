@@ -20,10 +20,10 @@ class ClusterAPIView(APIView):
     detail_schema = shcemas.ClusterSyncSchema
 
     @action(detail=False)
-    @url_params_require(mandatory_params=['region', 'product_name'])
+    # @url_params_require(mandatory_params=['region', 'product_name'])
     def get_available_deploy_cluster(self):
-        region = mandatory_params.get('region')
-        product_name = mandatory_params.get('product_name')
+        # region = mandatory_params.get('region')
+        # product_name = mandatory_params.get('product_name')
 
         return "product name, region"
 

@@ -1,4 +1,5 @@
 import decimal
+import simplejson as json
 
 from aggregation import db
 from aggregation.api.modules.cluster.models import ClusterDeployStrategy, StrategyProductConfig, \
@@ -145,22 +146,24 @@ class StrategyUtil(object):
         strategy = self.get_strategy()
         if not self.is_strategy_success(strategy):
             # need check
+            print("failed, send email to inform administrator")
             strategy_str = strategy.get_format_str()
             cluster_info = self.dump_cluster_inspect_info()
-            content = strategy_str + "\n" + cluster_info
+            content = "strategy: " + strategy_str + "\n cluster info" + cluster_info
             send_email(["ismewen@163.com"], sub="需要检查集群信息", content=content)
             self.cluster.make_full()
             db.session.add(self.cluster)
-            db.session.commit()
         else:
             # normal
-            pass
+            print("success, the cluster is available")
+            self.cluster.enable()
+            db.session.add(self.cluster)
 
     def dump_cluster_inspect_info(self):
         from .shcemas import ClusterInspectInfoDumpSchema
         s = ClusterInspectInfoDumpSchema()
-        data, error = s.dumps(self.cluster_inspect_info)
-        return data
+        data, error = s.dump(self.cluster_inspect_info)
+        return json.dumps(data)
 
 
 class ExpressFix(object):

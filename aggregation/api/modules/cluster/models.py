@@ -41,8 +41,16 @@ class Cluster(db.Model, Timestamp):
     def is_active(self):
         return self.status == 100
 
+    @hybrid_property
+    def is_full(self):
+        return self.status == 200
+
     def make_full(self):
         self.status = 200
+
+    def enable(self):
+        self.status = 100
+
 
 class ClusterInspectInfo(db.Model, Timestamp):
     __tablename__ = "cluster_inspect_info"
