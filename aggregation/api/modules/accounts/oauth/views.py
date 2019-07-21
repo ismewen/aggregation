@@ -95,6 +95,8 @@ def authorize():
 
 @blueprint.route('/token', methods=['POST'])
 def issue_token():
+    import pdb
+    pdb.set_trace()
     if request.form.get("grant_type") == "password":
         User.login(**request.form)
     return authorization.create_token_response()
