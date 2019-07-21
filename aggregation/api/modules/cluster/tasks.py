@@ -71,8 +71,7 @@ def cluster_info_record_sync():
         Cluster.is_active
     ).all()
     for cluster in clusters:
-        client = AgentServerClient(cluster)
-        sync = ClusterInspectInfoRecordSync(cluster=cluster, client=client)
+        sync = ClusterInspectInfoRecordSync(cluster=cluster, client_cls=AgentServerClient)
         sync.save_record()
     try:
         db.session.commit()
