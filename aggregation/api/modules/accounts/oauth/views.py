@@ -1,3 +1,5 @@
+import logging
+
 from authlib.oauth2 import OAuth2Error
 from flask import Blueprint, render_template, session, redirect, abort
 from flask import request
@@ -12,6 +14,8 @@ blueprint = Blueprint('oauth',
                       template_folder='templates',
                       url_prefix='/oauth',
                       )
+
+logger = logging.getLogger()
 
 
 def current_user():
@@ -49,6 +53,7 @@ def login():
         User.login(**data)
     except exceptions.HMTGeneralAuthenticateError as e:
         return e.api_response()
+
 
 @blueprint.route('/logout')
 def logout():
@@ -95,8 +100,6 @@ def authorize():
 
 @blueprint.route('/token', methods=['POST'])
 def issue_token():
-    import pdb
-    pdb.set_trace()
     if request.form.get("grant_type") == "password":
         User.login(**request.form)
     return authorization.create_token_response()

@@ -54,6 +54,8 @@ def create_app(settings):
 
     @app.route("/")
     def hello_world():
+        print("hello world")
+        raise Exception("hello world")
         return "hello world"
 
     return app
