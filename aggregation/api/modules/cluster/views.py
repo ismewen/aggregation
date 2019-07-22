@@ -1,6 +1,6 @@
 import random
 
-from flask import Blueprint
+from flask import Blueprint, request
 
 from aggregation.api.modules.cluster import models
 from aggregation.core.decorators import action, url_params_require
@@ -25,20 +25,15 @@ class ClusterAPIView(APIView):
     detail_schema = shcemas.ClusterDetailSchema
 
     @action(detail=False)
-    # @url_params_require(mandatory_params=['region', 'product_name'])
     def get_available_deploy_cluster(self, *args, **kwargs):
-        region = mandatory_params.get('region')
-        product_name = mandatory_params.get('product_name')
+        region = request.args.get('region')
         query = self.get_query(*args, **kwargs)
         query = query.filter(models.Cluster.is_active)
         if region:
             query = query.filter(models.Cluster.region == region)
-
         limit = query.count() - 1
         limit = limit if limit > -1 else 0
-
         the_cluster = query[random.randint(0, limit)]
-
         s = self.detail_schema()
         return s.dump(the_cluster).data
 

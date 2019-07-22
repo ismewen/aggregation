@@ -51,7 +51,7 @@ class ClientBase(metaclass=ABCMeta):
         return RemoteAPIBase.api_registry.get(frozenset([self.name, api_name]))
 
 
-class RemoteAPIBase(object):
+class RemoteAPIBase(metaclass=ABCMeta):
     remote_app_name: str = None  # unique name
     name: str = None  # unique name
     interface_template: str = None  # str can use format
