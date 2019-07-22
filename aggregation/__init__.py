@@ -14,6 +14,8 @@ from aggregation.extensions.login import login_manager
 from aggregation.extensions.oauth import config_oauth
 from aggregation.extensions.login import login_manager
 
+__version__ = "0.0.1"
+
 
 def create_app(settings):
     app = Flask(__name__)

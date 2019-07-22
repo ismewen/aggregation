@@ -22,7 +22,8 @@ class CustomSQLAlchemy(SQLAlchemy):
                 cls=model,
                 name='Model',
                 metadata=metadata,
-                metaclass=DefaultMeta
+                metaclass=DefaultMeta,
+                class_registry=self.class_registry if track_registry else None
             )
 
         if metadata is not None and model.metadata is not metadata:
