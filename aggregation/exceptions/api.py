@@ -26,5 +26,6 @@ class RequestArgsMissing(HMTGeneralAPIError):
     message = " parameter named of %(args_name)s is mandatory"
 
 
-
-
+class NotExistsAvailableCluster(HMTGeneralAPIError):
+    code = 1006
+    message = "Not Exists Available Cluster"

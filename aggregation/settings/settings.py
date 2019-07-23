@@ -75,7 +75,8 @@ ELASTIC_APM = dict(SERVICE_NAME='aide_api', SECRET_TOKEN=None, SERVER_URL='http:
 ENVIRONMENT = os.getenv("AGGREGATION", "LOCAL")
 
 # sentry
-SENTRY_DSN = "https://290b234cf226411d8768364b318f65c6@sentry.io/1501311"
+# SENTRY_DSN = "https://290b234cf226411d8768364b318f65c6@sentry.io/1501311"
+SENTRY_DSN = "http://7c0bcbec32e14236b151c3f625142065@sentry.ismewen.com/2"
 
 PRODUCTION = False
 

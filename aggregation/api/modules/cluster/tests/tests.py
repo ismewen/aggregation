@@ -1,5 +1,5 @@
 import copy
-
+import unittest
 from flask import url_for
 
 from aggregation import db
@@ -16,6 +16,7 @@ from aggregation.api.modules.cluster.tasks import ClusterInfoSync, ClusterInspec
 
 class ClusterTestCase(AggregationAuthorizedTestCase):
 
+    @unittest.skip
     def test_mandatory_query_params(self):
         uri = url_for("clusters.ClusterAPIView-get-available-deploy-cluster")
         res = self.client.get(uri)
@@ -25,6 +26,16 @@ class ClusterTestCase(AggregationAuthorizedTestCase):
             "product_name": "mongodb",
         }
         res = self.client.get(uri, params=data)
+        self.assert200(res)
+
+    def test_get_available_cluster(self):
+        uri = url_for("clusters.ClusterAPIView-get-available-deploy-cluster")
+        res = self.client.get(uri)
+        self.assert400(res)
+        self.assertTrue(res.json.get("code") == 1006)
+        self.test_cluster_info_sync()
+        uri = url_for("clusters.ClusterAPIView-get-available-deploy-cluster")
+        res = self.client.get(uri)
         self.assert200(res)
 
     def test_cluster_info_sync(self):
@@ -48,8 +59,7 @@ class ClusterTestCase(AggregationAuthorizedTestCase):
         cluster = Cluster.query.filter(Cluster.can_ask_inspect_info).filter(
             Cluster.is_active
         ).first()
-        client = AgentServerClient(cluster)
-        sync = ClusterInspectInfoRecordSync(cluster=cluster, client=client)
+        sync = ClusterInspectInfoRecordSync(cluster=cluster, client_cls=AgentServerClient)
         info = sync.get_cluster_inspect_info()
         self.assertEqual('return_code' in info, True)
         print(info)
@@ -57,8 +67,7 @@ class ClusterTestCase(AggregationAuthorizedTestCase):
     def test_save_cluster_inspect_info(self):
         self.test_cluster_info_sync()
         cluster = Cluster.query.filter(Cluster.can_ask_inspect_info).filter(Cluster.is_active).first()
-        client = AgentServerClient(cluster)
-        sync = ClusterInspectInfoRecordSync(cluster=cluster, client=client)
+        sync = ClusterInspectInfoRecordSync(cluster=cluster, client_cls=AgentServerClient)
         obj = sync.save_record()
         self.assertTrue(isinstance(obj, ClusterInspectInfo))
 
@@ -68,6 +77,9 @@ class ClusterTestCase(AggregationAuthorizedTestCase):
         count = ClusterInspectInfo.query.count()
         self.assertTrue(count > 0)
 
+    def test_sentry(self):
+        a = 1 / 0
+        self.assertRaises(AttributeError, a)
 
 class ClusterStrategyTestCase(AggregationAuthorizedTestCase):
 

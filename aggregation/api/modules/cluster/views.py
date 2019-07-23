@@ -2,6 +2,7 @@ import random
 
 from flask import Blueprint, request
 
+from aggregation import exceptions
 from aggregation.api.modules.cluster import models
 from aggregation.core.decorators import action, url_params_require
 from aggregation.core.proxy import mandatory_params
@@ -32,7 +33,8 @@ class ClusterAPIView(APIView):
         if region:
             query = query.filter(models.Cluster.region == region)
         limit = query.count() - 1
-        limit = limit if limit > -1 else 0
+        if limit == -1:
+            raise exceptions.NotExistsAvailableCluster()
         the_cluster = query[random.randint(0, limit)]
         s = self.detail_schema()
         return s.dump(the_cluster).data
