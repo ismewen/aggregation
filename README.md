@@ -61,6 +61,8 @@ class ParentAPIView(APIView):
 ParentAPIView.register_to(blueprint)
 ``` 
 
+
+```
 便会生成如下的接口,并实现基本的curd功能
 
 `GET`, `POST` /parents/                                                                                                       
@@ -74,5 +76,8 @@ action装饰器产生自定义的url
 `GET`, `POST` /parents/list_test/                                                                                                    
 `GET`, `POST` /parents/<parent_pk>/detail_test/
 
-`GET`, `POST` /parents/<parent_pk>/sons/<son_pk>/detail_test/                                                                                         u 
+`GET`, `POST` /parents/<parent_pk>/sons/<son_pk>/detail_test/                                                                                 u 
 `GET`, `POST` /parents/<parent_pk>/sons/list_test/
+
+```
+
