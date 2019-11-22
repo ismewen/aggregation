@@ -52,6 +52,8 @@ class APIView(MethodView):
                 pass
 
         try:
+            method = getattr(self, request.method.lower(), None)
+            setattr(request, "action", method.action)
             result = super(APIView, self).dispatch_request(*args, **kwargs)
             if isinstance(result, tuple) and len(result) == 2:
                 return make_response(jsonify(result[0]), result[1])
@@ -222,7 +224,7 @@ class APIView(MethodView):
         try:
             db.session.commit()
         except Exception as e:
-            raise exceptions.SqlalchemyCommitError(e.message)
+            raise exceptions.SqlalchemyCommitError(str(e))
         self.after_obj_deleted(obj)
         res = self.detail_schema().dump(obj, many=False).data, 204
         return res

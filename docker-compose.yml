@@ -46,12 +46,14 @@ services:
     restart: always
 
   cluster-db:
-    image: mysql:8.0
+    image: postgres:12.0
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ismewen
+      POSTGRES_PASSWORD: ismewen
+      POSTGRES_USER: ismewen
+      POSTGRES_DB: aggregation
     volumes:
-      - ~/mysql:/var/lib/mysql
+      - postgresql_volume:/var/lib/postgresql/data
     networks:
       - db
 
@@ -65,23 +67,16 @@ services:
       - "5672:5672"
       - "15672:15672"
     volumes:
-      - ~/rabbitmq:/var/lib/rabbitmq
+      - rabbitmq_volume:/var/lib/rabbitmq
     networks:
       - mq
 
-  nginx:
-    image: nginx
-    ports:
-      - 80:80
-    volumes:
-      - ./config/nginx/conf.d:/etc/nginx/conf.d
-      - ./log/nginx/:/var/log/nginx
-    depends_on:
-      - cluster-api
-    networks:
-      - nginx_network
 
 networks:
   db:
   mq:
   nginx_network:
+
+volumes:
+  postgresql_volume:
+  rabbitmq_volume:
