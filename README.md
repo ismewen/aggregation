@@ -136,3 +136,7 @@ from celery_app import celery
 def celery_test():
     print("this is an celery test")
 ```
+
+启动命令参考
+celery -A celery_app.celery worker -l info 
+celery -A celery_app.celery beat -l info 
