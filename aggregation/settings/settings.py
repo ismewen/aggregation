@@ -8,6 +8,7 @@ SECCRET_KEY = "HELLO"
 DEBUG = True
 REQUEST_DEBUG = False
 DEBUG_RANDOM_LATENCY = 1
+SQLALCHEMY_TRACK_MODIFICATIONS=False
 
 APP_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # refers to application_topS
 

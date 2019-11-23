@@ -9,7 +9,6 @@ from flask_sqlalchemy import Pagination
 from aggregation import db, exceptions, ma
 from aggregation.core.proxy import current_action
 from aggregation.core.routers import router
-from aggregation.extensions.oauth import require_oauth
 
 
 class APIView(MethodView):

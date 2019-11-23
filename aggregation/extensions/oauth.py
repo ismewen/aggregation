@@ -1,3 +1,5 @@
+from authlib.oauth2.rfc6749 import *
+
 from aggregation import db
 from authlib.flask.oauth2 import AuthorizationServer, ResourceProtector
 from authlib.flask.oauth2.sqla import (
@@ -42,8 +44,72 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
 
 
 class PasswordGrant(grants.ResourceOwnerPasswordCredentialsGrant):
-    def authenticate_user(self, username, password):
-        user = User.query.filter_by(username=username).first()
+
+
+    def validate_token_request(self):
+        """The client makes a request to the token endpoint by adding the
+        following parameters using the "application/x-www-form-urlencoded"
+        format per Appendix B with a character encoding of UTF-8 in the HTTP
+        request entity-body:
+
+        grant_type
+             REQUIRED.  Value MUST be set to "password".
+
+        username
+             REQUIRED.  The resource owner username.
+
+        password
+             REQUIRED.  The resource owner password.
+
+        scope
+             OPTIONAL.  The scope of the access request as described by
+             Section 3.3.
+
+        If the client type is confidential or the client was issued client
+        credentials (or assigned other authentication requirements), the
+        client MUST authenticate with the authorization server as described
+        in Section 3.2.1.
+
+        For example, the client makes the following HTTP request using
+        transport-layer security (with extra line breaks for display purposes
+        only):
+
+        .. code-block:: http
+
+            POST /token HTTP/1.1
+            Host: server.example.com
+            Authorization: Basic czZCaGRSa3F0MzpnWDFmQmF0M2JW
+            Content-Type: application/x-www-form-urlencoded
+
+            grant_type=password&username=johndoe&password=A3ddj3w
+        """
+        # ignore validate for grant_type, since it is validated by
+        # check_token_endpoint
+        client = self.authenticate_token_endpoint_client()
+
+        if not client.check_grant_type(self.GRANT_TYPE):
+            raise UnauthorizedClientError()
+
+        params = self.request.data
+        if 'email' not in params:
+            raise InvalidRequestError('Missing "email" in request.')
+        if 'password' not in params:
+            raise InvalidRequestError('Missing "password" in request.')
+
+        user = self.authenticate_user(
+            params['email'],
+            params['password']
+        )
+        if not user:
+            raise InvalidGrantError(
+                'Invalid "username" or "password" in request.',
+            )
+        self.validate_requested_scope(client)
+        self.request.client = client
+        self.request.user = user
+
+    def authenticate_user(self, email, password):
+        user = User.query.filter_by(email=email).first()
         if user.check_password(password):
             return user
 

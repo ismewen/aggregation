@@ -3,7 +3,17 @@
  一些东西出来，搭建了一个究极破产版的flask框架。
  
  ### 基本使用
- 
+ ####　登录验证
+ 1. 创建oauth2client 获取 client_id && client_secret
+ 2. 获取token
+ ```bash
+ curl -u AcLh3tbouNZHjIF9wXVW1GcG:y75N0K2kfBhnq9FJr4tNVxZZXlqlDMpRw1KC8Pf5rqLpkod7 -XPOST http://127.0.0.1:5000/oauth/token -F grant_type=password -F username=username -F password=password -F scope=profile
+```
+结果如下
+```python
+{"access_token": "bqsIhN09ienftV95D9mpVbPcVq9eclMpFgEnJ0YfDt", "expires_in": 864000, "scope": "profile", "token_type": "Bearer"}
+```
+
  #### apiview的基本用法
 ```python
 from flask import Blueprint
@@ -80,4 +90,49 @@ action装饰器产生自定义的url
 `GET`, `POST` /parents/<parent_pk>/sons/list_test/
 
 ```
+#### 测试用例
+```python
+from flask import url_for
 
+from aggregation import db
+from aggregation.core.unnittest.testcase import AggregationAuthorizedTestCase
+from aggregation.api.modules.tests.tests.factorys import ParentFactory 
+from aggregation.api.modules.tests.views import ParentAPIView 
+
+class ParentTestCase(AggregationAuthorizedTestCase):
+    detail_url_template = "test.{}-detail".format(ParentAPIView.__name__)
+    list_url_template = "test.{}-list".format(ParentAPIView.__name__)
+
+    def test_parent_list(self):
+        parents = ParentFactory.build_batch(30)
+        db.session.add_all(parents)
+        db.session.commit()
+        uri = url_for(self.list_url_template)
+        res = self.client.get(uri)
+        self.assert200(res)
+        print("***" * 10)
+        print(res.json)
+        print("***" * 10)
+
+    def test_parent_retrieve(self):
+        parent = ParentFactory.build()
+        db.session.add(parent)
+        db.session.commit()
+        uri = url_for(self.detail_url_template, pk=parent.id)
+        res = self.client.get(uri)
+        self.assert200(res)
+        print("***" * 10)
+        print(res.json)
+        print("***" * 10)
+```
+#### celery支持
+
+新建tasks.py文件
+```python
+
+from celery_app import celery
+
+@celery.task()
+def celery_test():
+    print("this is an celery test")
+```

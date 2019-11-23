@@ -3,6 +3,7 @@ import logging
 from authlib.oauth2 import OAuth2Error
 from flask import Blueprint, render_template, session, redirect, abort
 from flask import request
+from flask_login import current_user
 from werkzeug.security import gen_salt
 from aggregation import db, exceptions
 from aggregation.api.modules.accounts.models import User
@@ -17,12 +18,6 @@ blueprint = Blueprint('oauth',
 
 logger = logging.getLogger()
 
-
-def current_user():
-    if 'id' in session:
-        uid = session['id']
-        return User.query.get(uid)
-    return None
 
 
 @blueprint.route('/', methods=('GET', 'POST'))
@@ -44,13 +39,12 @@ def home():
     return render_template('home.html', user=user, clients=clients)
 
 
-@blueprint.route('/login')
+@blueprint.route('/login',methods=("GET", "POST"))
 def login():
-    data = request.get_json()
-    if not data or not isinstance(data, dict):
-        abort(400)
+    email, password = request.values.get("email"), request.values.get("password")
     try:
-        User.login(**data)
+        User.login(email=email, password=password)
+        return "success", 200
     except exceptions.HMTGeneralAuthenticateError as e:
         return e.api_response()
 
@@ -62,7 +56,7 @@ def logout():
 
 @blueprint.route('/create_client', methods=('GET', 'POST'))
 def create_client():
-    user = current_user()
+    user = current_user
     if not user:
         return redirect('/')
     if request.method == 'GET':
@@ -81,7 +75,9 @@ def create_client():
 
 @blueprint.route('/authorize', methods=['GET', 'POST'])
 def authorize():
-    user = current_user()
+    user = current_user
+    import ipdb
+    ipdb.set_trace()
     if request.method == 'GET':
         try:
             grant = authorization.validate_consent_request(end_user=user)
