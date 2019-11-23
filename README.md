@@ -140,3 +140,8 @@ def celery_test():
 启动命令参考
 celery -A celery_app.celery worker -l info 
 celery -A celery_app.celery beat -l info 
+
+#### todo
+1. 权限 
+2. 过滤
+3. ...
