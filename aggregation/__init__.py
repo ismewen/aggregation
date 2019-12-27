@@ -37,7 +37,6 @@ def create_app(settings):
 
     # discovery
     auto_register_blueprint(app)
-
     discover_remote_apps_api()
     # login init
     login_manager.init_app(app)

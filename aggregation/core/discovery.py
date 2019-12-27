@@ -8,6 +8,7 @@ from aggregation import remote_apps
 def discover(name):
     for loader, module_name, is_pkg in pkgutil.walk_packages(modules.__path__, modules.__name__ + '.'):
         if name in module_name and not is_pkg:
+            print(module_name, is_pkg)
             try:
                 loader.find_module(module_name).load_module(module_name)
             except ModuleNotFoundError as e:
@@ -33,3 +34,6 @@ def discover_remote_apps_api():
                 loader.find_module(module_name).load_module(module_name)
             except ModuleNotFoundError as e:
                 print(e)
+
+
+
