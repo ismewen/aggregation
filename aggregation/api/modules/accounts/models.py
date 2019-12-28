@@ -6,16 +6,12 @@ from flask_login import UserMixin, login_user
 from sqlalchemy.orm import object_session
 from aggregation import db, exceptions
 
-print("look at here")
-print("look at here")
-print("look at here")
-print("look at here")
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_name = db.Column(db.String(40), unique=True)
     password = db.Column(db.Binary(70))
     email = db.Column(db.String(64), unique=True)
-
 
     def __str__(self):
         return self.username

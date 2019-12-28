@@ -6,10 +6,6 @@ from flask_babel import gettext as _
 
 from aggregation import db
 
-print("transaction here")
-print("transaction here")
-print("transaction here")
-print("transaction here")
 
 class TransactionEnabled(object):
     """
@@ -38,21 +34,22 @@ class TransactionRecord(db.Model):
     transactions = db.relationship(Transaction, )
 
 
-# @event.listens_for(TransactionEnabled,  "mapper_configured", propagate=True)
-# def setup_listener(mapper, class_):
-#     obj_table = class_.__tablename__
-#     if isinstance(class_.id.type, UUIDType):
-#         remote = Transaction.object_uuid
-#     else:
-#         remote = Transaction.object_id
-#     class_.transactions = db.relation(
-#         Transaction,
-#         primaryjoin=db.and_(
-#             class_.id == db.foreign(db.remote(remote)),
-#             class_.object_table == obj_table
-#         ),
-#         cascade="all,delete",
-#         lazy='dynamic',
-#         backref=db.backref()
-#     )
+@event.listens_for(TransactionEnabled,  "mapper_configured", propagate=True)
+def setup_listener(mapper, class_):
+
+    obj_table = class_.__tablename__
+    if isinstance(class_.id.type, UUIDType):
+        remote = Transaction.object_uuid
+    else:
+        remote = Transaction.object_id
+    class_.transactions = db.relation(
+        Transaction,
+        primaryjoin=db.and_(
+            class_.id == db.foreign(db.remote(remote)),
+            Transaction.object_table == obj_table
+        ),
+        cascade="all,delete",
+        lazy='dynamic',
+        backref=db.backref(obj_table)
+    )
 
