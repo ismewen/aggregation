@@ -5,7 +5,7 @@ appnope==0.1.0
 arrow==0.14.2
 asn1crypto==0.24.0
 Authlib==0.11
-Babel==2.7.0
+Babel==2.9.1
 bcrypt==3.1.7
 billiard==3.6.0.0
 blinker==1.4
